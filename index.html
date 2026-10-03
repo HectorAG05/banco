@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>VUELO Zapatillas</title>
+  <meta name="description" content="VUELO — zapatillas urbanas, running y básquet. Elegí tu modelo y pedilo por WhatsApp.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Unbounded:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <a class="logo" href="#inicio" aria-label="VUELO, ir al inicio">VUELO<span class="logo-dot" aria-hidden="true"></span></a>
+      <nav class="nav" aria-label="Categorías">
+        <button type="button" class="nav-link" data-nav="hombre">Hombre</button>
+        <button type="button" class="nav-link" data-nav="mujer">Mujer</button>
+        <button type="button" class="nav-link" data-nav="ninos">Niños</button>
+        <button type="button" class="nav-link nav-sale" data-nav="ofertas">Ofertas</button>
+      </nav>
+      <label class="search" for="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="search" type="search" placeholder="Buscar modelo" autocomplete="off">
+      </label>
+      <button type="button" class="cart-btn" id="cart-open" aria-label="Abrir carrito">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8L5 8Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        <span class="cart-count" id="cart-count">0</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="ticker" aria-label="Beneficios">
+    <div class="ticker-track">
+      <span>Envíos a todo el país</span><span>10% off pagando por transferencia</span><span>Cambios hasta 30 días</span><span>Envío gratis desde $150.000</span><span>Pedidos por WhatsApp</span>
+      <span aria-hidden="true">Envíos a todo el país</span><span aria-hidden="true">10% off pagando por transferencia</span><span aria-hidden="true">Cambios hasta 30 días</span><span aria-hidden="true">Envío gratis desde $150.000</span><span aria-hidden="true">Pedidos por WhatsApp</span>
+    </div>
+  </div>
+
+  <main id="inicio">
+    <section class="hero wrap">
+      <div class="hero-copy">
+        <p class="eyebrow">Temporada Primavera · Verano 26</p>
+        <h1>Pisá<br><span>distinto.</span></h1>
+        <p class="hero-sub">Zapatillas de diseño propio, armadas para la calle y para correr. Elegís modelo, color y talle, y cerrás la compra con nosotros por WhatsApp.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#catalogo">Ver catálogo</a>
+          <a class="btn btn-ghost" id="hero-wa" href="#" target="_blank" rel="noopener">Consultar por WhatsApp</a>
+        </div>
+      </div>
+      <div class="boxlabel" aria-label="Modelo destacado">
+        <div class="boxlabel-art" id="hero-art"></div>
+        <dl class="boxlabel-data">
+          <div><dt>Modelo</dt><dd id="hero-name">Aire 01</dd></div>
+          <div><dt>Estilo</dt><dd id="hero-code">VL-2601-114</dd></div>
+          <div class="span2"><dt>Talle</dt><dd>AR 41 · US 9 · 27 cm</dd></div>
+          <div><dt>Precio</dt><dd id="hero-price">$0</dd></div>
+          <div><dt>Hecho en</dt><dd>Argentina</dd></div>
+        </dl>
+        <div class="boxlabel-foot">
+          <span class="barcode" aria-hidden="true"></span>
+          <button type="button" class="btn btn-small" id="hero-view">Ver modelo</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="catalog wrap" id="catalogo" aria-labelledby="catalog-title">
+      <div class="section-head">
+        <h2 id="catalog-title">Catálogo</h2>
+        <p class="count" id="result-count" aria-live="polite"></p>
+      </div>
+      <div class="toolbar">
+        <div class="chips" role="group" aria-label="Filtrar">
+          <button type="button" class="chip is-active" data-filter="todos">Todos</button>
+          <button type="button" class="chip" data-filter="hombre">Hombre</button>
+          <button type="button" class="chip" data-filter="mujer">Mujer</button>
+          <button type="button" class="chip" data-filter="ninos">Niños</button>
+          <button type="button" class="chip" data-filter="running">Running</button>
+          <button type="button" class="chip" data-filter="urbano">Urbano</button>
+          <button type="button" class="chip" data-filter="basquet">Básquet</button>
+          <button type="button" class="chip chip-sale" data-filter="ofertas">Ofertas</button>
+        </div>
+        <label class="sort" for="sort">Ordenar
+          <select id="sort">
+            <option value="destacados">Destacados</option>
+            <option value="precio-asc">Menor precio</option>
+            <option value="precio-desc">Mayor precio</option>
+            <option value="nombre">Nombre A–Z</option>
+          </select>
+        </label>
+      </div>
+      <div class="grid" id="grid"></div>
+      <p class="empty" id="empty" hidden>No encontramos modelos con ese filtro. Probá con otra categoría o borrá la búsqueda.</p>
+    </section>
+
+    <section class="sizes wrap" id="talles" aria-labelledby="sizes-title">
+      <div class="sizes-copy">
+        <h2 id="sizes-title">Guía de talles</h2>
+        <p>Medí tu pie de talón a punta apoyado sobre una hoja y buscá el largo en centímetros. Si quedás entre dos talles, elegí el más grande. Igual te asesoramos por WhatsApp antes de confirmar.</p>
+      </div>
+      <div class="table-scroll">
+        <table class="size-table">
+          <caption class="sr-only">Equivalencia de talles adultos</caption>
+          <thead><tr><th scope="row">AR</th></tr></thead>
+          <tbody><tr><th scope="row">US</th></tr><tr><th scope="row">CM</th></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="perks wrap" aria-label="Cómo comprar">
+      <ol class="steps">
+        <li><span class="step-n">1</span><div><h3>Armá tu carrito</h3><p>Elegí modelo, color y talle. Podés sumar varios pares.</p></div></li>
+        <li><span class="step-n">2</span><div><h3>Completá tus datos</h3><p>Nombre, forma de entrega y de pago. Nada más.</p></div></li>
+        <li><span class="step-n">3</span><div><h3>Enviá por WhatsApp</h3><p>Te llega el pedido armado al chat y te confirmamos stock y envío.</p></div></li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="foot-inner wrap">
+      <div>
+        <p class="logo logo-foot">VUELO<span class="logo-dot" aria-hidden="true"></span></p>
+        <p class="foot-note">Zapatillas de diseño propio. Showroom en Palermo, CABA, con cita previa.</p>
+      </div>
+      <div class="foot-contact">
+        <p class="label">WhatsApp de ventas</p>
+        <p class="wa-number"><span id="wa-display"></span> <button type="button" class="link-btn" id="copy-number">Copiar</button></p>
+        <p class="foot-note">Lunes a sábado, 10 a 20 h.</p>
+      </div>
+    </div>
+    <p class="wrap legal">© <span id="year"></span> VUELO. Precios en pesos argentinos con IVA incluido.</p>
+  </footer>
+
+  <a class="wa-float" id="wa-float" href="#" target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3Zm0 23.6c-2 0-4-.6-5.7-1.6l-.4-.2-3.9 1 1-3.8-.3-.4A10.6 10.6 0 1 1 16 26.6Zm5.8-7.9c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2l-1 1.2c-.2.2-.4.2-.7.1a8.7 8.7 0 0 1-4.3-3.8c-.3-.6.3-.5.9-1.7.1-.2 0-.4 0-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.8s1.2 3.2 1.4 3.5c.2.2 2.4 3.6 5.7 5 2.1.9 2.9 1 4 .8.6-.1 1.9-.8 2.2-1.5.3-.8.3-1.4.2-1.5-.1-.2-.3-.2-.6-.4Z"/></svg>
+  </a>
+
+  <!-- Detalle de producto -->
+  <dialog class="modal" id="product-modal" aria-labelledby="pm-name">
+    <form method="dialog" class="modal-close-form"><button class="icon-btn" aria-label="Cerrar">✕</button></form>
+    <div class="modal-grid">
+      <div class="modal-art" id="pm-art"></div>
+      <div class="modal-info">
+        <p class="eyebrow" id="pm-cat"></p>
+        <h2 id="pm-name"></h2>
+        <p class="pm-price" id="pm-price"></p>
+        <p class="pm-desc" id="pm-desc"></p>
+        <fieldset class="field">
+          <legend>Color · <span id="pm-color-name"></span></legend>
+          <div class="pm-colors" id="pm-colors"></div>
+        </fieldset>
+        <fieldset class="field">
+          <legend>Talle AR <span class="muted" id="pm-size-eq"></span></legend>
+          <div class="pm-sizes" id="pm-sizes"></div>
+          <p class="field-error" id="pm-size-error" hidden>Elegí un talle para continuar.</p>
+        </fieldset>
+        <div class="pm-actions">
+          <div class="qty" aria-label="Cantidad">
+            <button type="button" id="pm-minus" aria-label="Restar uno">−</button>
+            <output id="pm-qty">1</output>
+            <button type="button" id="pm-plus" aria-label="Sumar uno">+</button>
+          </div>
+          <button type="button" class="btn btn-primary grow" id="pm-add">Agregar al carrito</button>
+        </div>
+        <a class="btn btn-wa" id="pm-buy" href="#" target="_blank" rel="noopener">Comprar ahora por WhatsApp</a>
+        <p class="pm-code mono" id="pm-code"></p>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Carrito -->
+  <div class="overlay" id="overlay" hidden></div>
+  <aside class="drawer" id="cart" aria-labelledby="cart-title" aria-hidden="true">
+    <div class="drawer-head">
+      <h2 id="cart-title">Tu carrito</h2>
+      <button type="button" class="icon-btn" id="cart-close" aria-label="Cerrar carrito">✕</button>
+    </div>
+    <div class="drawer-body">
+      <ul class="cart-list" id="cart-list"></ul>
+      <div class="cart-empty" id="cart-empty">
+        <p>Tu carrito está vacío.</p>
+        <button type="button" class="btn btn-primary" id="cart-browse">Ver catálogo</button>
+      </div>
+
+      <form class="checkout" id="checkout" novalidate>
+        <h3>Datos para el pedido</h3>
+        <label class="input" for="c-name">Nombre y apellido
+          <input id="c-name" name="nombre" autocomplete="name" required>
+        </label>
+        <fieldset class="field">
+          <legend>Entrega</legend>
+          <div class="radios">
+            <label><input type="radio" name="entrega" id="c-ship-home" value="envio" checked> Envío a domicilio</label>
+            <label><input type="radio" name="entrega" id="c-ship-pickup" value="retiro"> Retiro en showroom</label>
+          </div>
+        </fieldset>
+        <label class="input" for="c-address" id="c-address-wrap">Dirección, ciudad y código postal
+          <input id="c-address" name="direccion" autocomplete="street-address" required>
+        </label>
+        <label class="input" for="c-pay">Forma de pago
+          <select id="c-pay" name="pago">
+            <option value="Transferencia">Transferencia (10% off)</option>
+            <option value="Mercado Pago">Mercado Pago</option>
+            <option value="Tarjeta de crédito">Tarjeta de crédito (3 cuotas sin interés)</option>
+            <option value="Efectivo">Efectivo al retirar</option>
+          </select>
+        </label>
+        <label class="input" for="c-notes">Notas (opcional)
+          <textarea id="c-notes" name="notas" rows="2" placeholder="Horario de entrega, consultas de talle…"></textarea>
+        </label>
+        <p class="field-error" id="c-error" hidden></p>
+      </form>
+    </div>
+    <div class="drawer-foot" id="cart-foot">
+      <dl class="totals">
+        <div><dt>Subtotal</dt><dd id="t-sub"></dd></div>
+        <div id="t-disc-row"><dt>Descuento transferencia</dt><dd id="t-disc"></dd></div>
+        <div><dt>Envío</dt><dd id="t-ship"></dd></div>
+        <div class="total"><dt>Total</dt><dd id="t-total"></dd></div>
+      </dl>
+      <a class="btn btn-wa btn-block" id="checkout-wa" href="#" target="_blank" rel="noopener">Enviar pedido por WhatsApp</a>
+      <div class="sent" id="sent" hidden>
+        <p>Abrimos WhatsApp con tu pedido listo para enviar. Si no se abrió, copiá el mensaje y mandalo al <strong class="mono" id="sent-number"></strong>.</p>
+        <button type="button" class="link-btn" id="copy-order">Copiar mensaje</button>
+        <textarea id="order-text" class="order-text" rows="3" readonly aria-label="Mensaje del pedido"></textarea>
+      </div>
+    </div>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="js/productos.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
