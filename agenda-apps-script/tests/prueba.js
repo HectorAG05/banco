@@ -191,28 +191,6 @@ assert.ok(hojas['LISTA PACIENTES'].celda(1, 1).f.startsWith('=SORT(UNIQUE(FILTER
 assert.ok(v(oct, 30, 4).dv && v(oct, 30, 4).dv.allowInvalid === true);
 assert.strictEqual(v(sep, 30, 4).dv, null);
 
-// 13. Día y fecha: se copian de la fila más cercana del mismo bloque
-const nov = new Hoja('NOVIEMBRE 2026 CICLOS'); hojas[nov.n] = nov;
-const lunes = new Date(2026, 10, 2), martes = new Date(2026, 10, 3);
-nov.celda(5, 1).v = 'COMITÉ MAMA'; nov.combinar(5, 1, 1, 16);
-nov.celda(6, 1).v = 'LUNES'; nov.celda(6, 2).v = lunes; nov.celda(6, 2).nf = 'd/m/yyyy';
-nov.celda(9, 1).v = ''; // fila vacía del mismo bloque
-nov.combinar(10, 1, 1, 16); // separador sin texto
-nov.celda(12, 1).v = 'MARTES'; nov.celda(12, 2).v = martes;
-editar(nov, 8, 4, 'PEREZ JUAN');           // debajo de LUNES -> LUNES
-assert.strictEqual(v(nov, 8, 1).v, 'LUNES');
-assert.strictEqual(v(nov, 8, 2).v, lunes);
-assert.strictEqual(v(nov, 8, 2).nf, 'd/m/yyyy');
-editar(nov, 11, 4, 'PEREZ JUAN');          // primera fila tras separador -> MARTES (abajo)
-assert.strictEqual(v(nov, 11, 1).v, 'MARTES');
-nov.celda(7, 1).v = 'MIERCOLES'; nov.celda(7, 2).v = 'otra';
-editar(nov, 7, 4, 'PEREZ JUAN');           // si ya tiene día, no lo toca
-assert.strictEqual(v(nov, 7, 1).v, 'MIERCOLES');
-// Fila 7 de octubre real: arriba hay una fila con texto y sin fecha -> toma la de abajo
-oct.celda(40, 1).v = 'Martin, Esteso, Cami'; oct.celda(42, 1).v = 'JUEVES'; oct.celda(42, 2).v = lunes;
-editar(oct, 41, 4, 'PEREZ JUAN');
-assert.strictEqual(v(oct, 41, 1).v, 'JUEVES');
-
 // 14. Reparar fórmulas viejas con ',' que quedaron en #ERROR!
 oct.celda(50, 5).f = '=IFERROR(INDEX(FILTER(PACIENTES!$M$2:$M, PACIENTES!$H$2:$H=$C50, PACIENTES!$C$2:$C=$G50), 1), "")';
 oct.celda(50, 5).v = '#ERROR!';

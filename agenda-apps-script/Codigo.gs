@@ -11,8 +11,6 @@
  *          para elegir; al elegirlo se completa el resto.
  *   3. RAMA, COORDINADORA, SPONSOR e INVESTIGADOR quedan como fórmulas
  *      vinculadas a PACIENTES: si se corrige algo allí, se actualiza en vivo.
- *   4. Si la fila no tiene DÍA y FECHA (columnas A y B), los copia de la fila
- *      más cercana del mismo bloque de día.
  *
  * Instalación: ver README.md de esta carpeta.
  */
@@ -56,12 +54,8 @@ var C = {
   PI: 9            // I
 };
 
-var COL_DIA = 1;    // A: día de la semana
-var COL_FECHA = 2;  // B: fecha
-
 var PRIMERA_FILA_DATOS = 2;
 var SEPARADOR = ' · ';
-var VENTANA_DIA = 80; // filas hacia arriba/abajo donde buscar el día
 
 // Separador de argumentos de fórmulas: ';' en planillas con configuración
 // regional de coma decimal (ej. Argentina), ',' en las demás. Se detecta solo.
@@ -126,7 +120,6 @@ function alCambiarNombre(hoja, fila, pacientes) {
     return;
   }
   hoja.getRange(fila, C.NOMBRE).setValue(opciones[0].nombre).clearNote();
-  completarDia(hoja, fila);
 
   if (opciones.length === 1) {
     completarFila(hoja, fila, opciones[0]);
@@ -186,30 +179,6 @@ function escribirFormulasFila(hoja, fila) {
   escribirFormula(hoja.getRange(fila, C.COORDI), f.coordi);
   escribirFormula(hoja.getRange(fila, C.SPONSOR), f.sponsor);
   escribirFormula(hoja.getRange(fila, C.PI), f.pi);
-}
-
-/** Copia DÍA y FECHA de la fila más cercana del mismo bloque, si faltan. */
-function completarDia(hoja, fila) {
-  var actual = hoja.getRange(fila, COL_DIA, 1, 2).getValues()[0];
-  if (actual[0] !== '' || actual[1] !== '') return;
-
-  var desde = Math.max(PRIMERA_FILA_DATOS, fila - VENTANA_DIA);
-  var hasta = Math.min(hoja.getMaxRows(), fila + VENTANA_DIA);
-  var n = hasta - desde + 1;
-  var valores = hoja.getRange(desde, COL_DIA, n, 2).getValues();
-
-  // Filas combinadas a lo ancho (ej. "COMITÉ ...") separan un día de otro.
-  var separadoras = {};
-  hoja.getRange(desde, 1, n, 4).getMergedRanges().forEach(function (m) {
-    if (m.getColumn() === 1 && m.getNumColumns() >= 3) {
-      for (var r = m.getRow(); r <= m.getLastRow(); r++) separadoras[r] = true;
-    }
-  });
-
-  var origen = buscarFilaDia(valores, desde, fila, separadoras);
-  if (!origen) return;
-  hoja.getRange(fila, COL_FECHA).setNumberFormat(hoja.getRange(origen, COL_FECHA).getNumberFormat());
-  hoja.getRange(fila, COL_DIA, 1, 2).setValues([valores[origen - desde]]);
 }
 
 function limpiarDatos(hoja, fila) {
@@ -328,32 +297,6 @@ function candidatoPorNumero(candidatos, nro) {
   if (!v) return null;
   var m = candidatos.filter(function (c) { return String(c.nroPac).trim() === v; });
   return m.length === 1 ? m[0] : null;
-}
-
-/**
- * Fila más cercana con FECHA, primero hacia arriba y luego hacia abajo, sin
- * cruzar filas separadoras (combinadas, o con texto en A y sin fecha en B).
- * `valores` son las columnas A:B desde la fila `desde`.
- */
-function buscarFilaDia(valores, desde, fila, separadoras) {
-  function vacio(v) { return v === '' || v === null || v === undefined; }
-  function revisar(r) {
-    var v = valores[r - desde];
-    if (!v || separadoras[r]) return 'corte';
-    if (!vacio(v[1])) return 'ok';
-    if (!vacio(v[0])) return 'corte';
-    return 'seguir';
-  }
-  var ultima = desde + valores.length - 1;
-  var pasos = [[fila - 1, -1, desde], [fila + 1, 1, ultima]];
-  for (var i = 0; i < pasos.length; i++) {
-    for (var r = pasos[i][0]; pasos[i][1] < 0 ? r >= pasos[i][2] : r <= pasos[i][2]; r += pasos[i][1]) {
-      var e = revisar(r);
-      if (e === 'ok') return r;
-      if (e === 'corte') break;
-    }
-  }
-  return null;
 }
 
 /** Cambia las comas que separan argumentos por ';' (las fórmulas de este script no usan comas en textos). */

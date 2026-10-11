@@ -24,11 +24,8 @@ las de ESTUDIOS no cambian.
    en PACIENTES, se actualiza en vivo en la agenda, sin recargar.
 4. La lista del desplegable también se actualiza sola cuando se agrega un
    paciente nuevo en PACIENTES.
-5. Si la fila no tiene **DÍA y FECHA** (columnas A y B), los copia de la fila
-   más cercana del mismo bloque de día (sin cruzar las filas combinadas tipo
-   "COMITÉ ...").
-6. Si se borra el nombre de una fila, se limpian C, E, F, G, H e I de esa fila.
-7. Si el nombre no está en PACIENTES, se avisa con un mensaje y una nota en la
+5. Si se borra el nombre de una fila, se limpian C, E, F, G, H e I de esa fila.
+6. Si el nombre no está en PACIENTES, se avisa con un mensaje y una nota en la
    celda, y no se toca nada más.
 
 ## Instalación (una sola vez, ~2 minutos)
