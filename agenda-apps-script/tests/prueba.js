@@ -15,7 +15,18 @@ class Rango {
   getValues() { const o = []; for (let i = 0; i < this.nr; i++) { const f = []; for (let j = 0; j < this.nc; j++) f.push(this.h.celda(this.r + i, this.c + j).v); o.push(f); } return o; }
   _todas(fn) { for (let i = 0; i < this.nr; i++) for (let j = 0; j < this.nc; j++) fn(this.h.celda(this.r + i, this.c + j)); return this; }
   setValue(v) { return this._todas(c => { c.v = v; c.f = null; }); }
-  setFormula(f) { return this._todas(c => { c.f = f; c.v = '<formula>'; }); }
+  setFormula(f) {
+    // Simula la configuración regional: en es_AR una fórmula con ',' da #ERROR!
+    const malo = LOCALE.startsWith('es_AR') ? f.includes(',') : f.includes(';');
+    return this._todas(c => { c.f = f; c.v = malo ? '#ERROR!' : '<formula>'; });
+  }
+  getDisplayValue() { return String(this._c().v); }
+  getDisplayValues() { return this.getValues().map(f => f.map(String)); }
+  getFormulas() { const o = []; for (let i = 0; i < this.nr; i++) o.push([this.h.celda(this.r + i, this.c).f || '']); return o; }
+  getNumberFormat() { return this._c().nf; }
+  setValues(m) { m.forEach((f, i) => f.forEach((v, j) => { const c = this.h.celda(this.r + i, this.c + j); c.v = v; c.f = null; })); return this; }
+  getNumColumns() { return this.nc; }
+  getMergedRanges() { return this.h.merges.filter(m => m.r <= this.getLastRow() && m.getLastRow() >= this.r); }
   clearContent() { return this._todas(c => { c.v = ''; c.f = null; }); }
   setNumberFormat(n) { return this._todas(c => { c.nf = n; }); }
   setDataValidation(d) { return this._todas(c => { c.dv = d; }); }
@@ -25,7 +36,9 @@ class Rango {
   setBackground(b) { return this._todas(c => { c.bg = b; }); }
 }
 class Hoja {
-  constructor(n) { this.n = n; this.m = {}; this.hidden = false; }
+  constructor(n) { this.n = n; this.m = {}; this.hidden = false; this.merges = []; }
+  combinar(r, c, nr, nc) { this.merges.push(new Rango(this, r, c, nr, nc)); }
+  isSheetHidden() { return this.hidden; }
   getName() { return this.n; }
   celda(r, c) { return this.m[r + ',' + c] || (this.m[r + ',' + c] = new Celda()); }
   getRange(r, c, nr, nc) { if (typeof r === 'string') return new Rango(this, 1, 1, 1000, 1); return new Rango(this, r, c, nr, nc); }
@@ -33,6 +46,7 @@ class Hoja {
   getMaxRows() { return 1000; }
   hideSheet() { this.hidden = true; }
 }
+let LOCALE = 'es_AR';
 const hojas = {};
 const toasts = [];
 const ss = {
@@ -40,6 +54,9 @@ const ss = {
   insertSheet: n => (hojas[n] = new Hoja(n)),
   getSheets: () => Object.values(hojas),
   toast: m => toasts.push(m),
+  getSpreadsheetLocale: () => LOCALE,
+  getActiveSheet: () => hojas['OCTUBRE 2026 CICLOS'],
+  setActiveSheet: h => h,
 };
 function dvBuilder() {
   const d = {};
@@ -53,12 +70,13 @@ function dvBuilder() {
 }
 const SpreadsheetApp = {
   getActive: () => ss,
+  flush: () => {},
   newDataValidation: dvBuilder,
   getUi: () => ({ alert: m => toasts.push(m), createMenu: () => ({ addItem() { return this; }, addToUi() {} }) }),
 };
 
 // ---- Cargar el script ----
-const ctx = { SpreadsheetApp };
+const ctx = { SpreadsheetApp, Logger: { log: () => {} } };
 vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'Codigo.gs'), 'utf8'), ctx);
 
@@ -98,7 +116,11 @@ assert.strictEqual(v(oct, 10, 4).v, 'PEREZ JUAN');
 assert.strictEqual(v(oct, 10, 3).v, '030700002');
 assert.strictEqual(v(oct, 10, 3).nf, '@');
 assert.strictEqual(v(oct, 10, 7).v, 'MK2870009');
-for (const c of [5, 6, 8, 9]) assert.ok(v(oct, 10, c).f.includes('$C10') && v(oct, 10, c).f.includes('$G10'));
+for (const c of [5, 6, 8, 9]) {
+  assert.ok(v(oct, 10, c).f.includes('$C10') && v(oct, 10, c).f.includes('$G10'));
+  assert.ok(!v(oct, 10, c).f.includes(','), 'en es_AR se usa ;');
+  assert.notStrictEqual(v(oct, 10, c).v, '#ERROR!');
+}
 assert.ok(v(oct, 10, 5).f.includes('PACIENTES!$M$2:$M'));   // RAMA
 assert.ok(v(oct, 10, 6).f.includes('PACIENTES!$N$2:$N'));   // COORDI
 assert.ok(v(oct, 10, 8).f.includes('PACIENTES!$A$2:$A'));   // SPONSOR
@@ -168,5 +190,51 @@ assert.ok(hojas['LISTA PACIENTES'].hidden);
 assert.ok(hojas['LISTA PACIENTES'].celda(1, 1).f.startsWith('=SORT(UNIQUE(FILTER('));
 assert.ok(v(oct, 30, 4).dv && v(oct, 30, 4).dv.allowInvalid === true);
 assert.strictEqual(v(sep, 30, 4).dv, null);
+
+// 13. Día y fecha: se copian de la fila más cercana del mismo bloque
+const nov = new Hoja('NOVIEMBRE 2026 CICLOS'); hojas[nov.n] = nov;
+const lunes = new Date(2026, 10, 2), martes = new Date(2026, 10, 3);
+nov.celda(5, 1).v = 'COMITÉ MAMA'; nov.combinar(5, 1, 1, 16);
+nov.celda(6, 1).v = 'LUNES'; nov.celda(6, 2).v = lunes; nov.celda(6, 2).nf = 'd/m/yyyy';
+nov.celda(9, 1).v = ''; // fila vacía del mismo bloque
+nov.combinar(10, 1, 1, 16); // separador sin texto
+nov.celda(12, 1).v = 'MARTES'; nov.celda(12, 2).v = martes;
+editar(nov, 8, 4, 'PEREZ JUAN');           // debajo de LUNES -> LUNES
+assert.strictEqual(v(nov, 8, 1).v, 'LUNES');
+assert.strictEqual(v(nov, 8, 2).v, lunes);
+assert.strictEqual(v(nov, 8, 2).nf, 'd/m/yyyy');
+editar(nov, 11, 4, 'PEREZ JUAN');          // primera fila tras separador -> MARTES (abajo)
+assert.strictEqual(v(nov, 11, 1).v, 'MARTES');
+nov.celda(7, 1).v = 'MIERCOLES'; nov.celda(7, 2).v = 'otra';
+editar(nov, 7, 4, 'PEREZ JUAN');           // si ya tiene día, no lo toca
+assert.strictEqual(v(nov, 7, 1).v, 'MIERCOLES');
+// Fila 7 de octubre real: arriba hay una fila con texto y sin fecha -> toma la de abajo
+oct.celda(40, 1).v = 'Martin, Esteso, Cami'; oct.celda(42, 1).v = 'JUEVES'; oct.celda(42, 2).v = lunes;
+editar(oct, 41, 4, 'PEREZ JUAN');
+assert.strictEqual(v(oct, 41, 1).v, 'JUEVES');
+
+// 14. Reparar fórmulas viejas con ',' que quedaron en #ERROR!
+oct.celda(50, 5).f = '=IFERROR(INDEX(FILTER(PACIENTES!$M$2:$M, PACIENTES!$H$2:$H=$C50, PACIENTES!$C$2:$C=$G50), 1), "")';
+oct.celda(50, 5).v = '#ERROR!';
+ctx.configurarCiclos();
+assert.ok(!v(oct, 50, 5).f.includes(','));
+assert.strictEqual(v(oct, 50, 9).f.includes(';'), true);
+assert.ok(!hojas['LISTA PACIENTES'].celda(1, 1).f.includes(','));
+
+// 15. En una planilla en inglés se usan comas
+const ctx2 = { SpreadsheetApp, Logger: { log: () => {} } };
+vm.createContext(ctx2);
+vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'Codigo.gs'), 'utf8'), ctx2);
+LOCALE = 'en_US';
+const r = oct.getRange(60, 5);
+ctx2.escribirFormula(r, '=IFERROR(INDEX(FILTER(A:A, B:B=1), 1), "")');
+assert.ok(v(oct, 60, 5).f.includes(',') && v(oct, 60, 5).v !== '#ERROR!');
+// y si la detección por idioma falla, prueba el otro separador
+LOCALE = 'es_AR';
+const ctx3 = { SpreadsheetApp: Object.assign({}, SpreadsheetApp, { getActive: () => Object.assign({}, ss, { getSpreadsheetLocale: () => 'en_US' }) }), Logger: ctx2.Logger };
+vm.createContext(ctx3);
+vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'Codigo.gs'), 'utf8'), ctx3);
+ctx3.escribirFormula(oct.getRange(61, 5), '=IFERROR(INDEX(FILTER(A:A, B:B=1), 1), "")');
+assert.ok(v(oct, 61, 5).f.includes(';') && v(oct, 61, 5).v !== '#ERROR!');
 
 console.log('OK — todas las pruebas pasaron');

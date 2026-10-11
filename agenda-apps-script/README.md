@@ -24,8 +24,11 @@ las de ESTUDIOS no cambian.
    en PACIENTES, se actualiza en vivo en la agenda, sin recargar.
 4. La lista del desplegable también se actualiza sola cuando se agrega un
    paciente nuevo en PACIENTES.
-5. Si se borra el nombre de una fila, se limpian C, E, F, G, H e I de esa fila.
-6. Si el nombre no está en PACIENTES, se avisa con un mensaje y una nota en la
+5. Si la fila no tiene **DÍA y FECHA** (columnas A y B), los copia de la fila
+   más cercana del mismo bloque de día (sin cruzar las filas combinadas tipo
+   "COMITÉ ...").
+6. Si se borra el nombre de una fila, se limpian C, E, F, G, H e I de esa fila.
+7. Si el nombre no está en PACIENTES, se avisa con un mensaje y una nota en la
    celda, y no se toca nada más.
 
 ## Instalación (una sola vez, ~2 minutos)
@@ -48,7 +51,18 @@ Cuando se cree una hoja de CICLOS nueva (ej. ENERO 2027 CICLOS), volvé a
 ejecutar **Agenda → Activar autocompletado en CICLOS** para agregarle el
 desplegable (el autocompletado funciona igual aunque no lo tenga).
 
+## Actualizar a una versión nueva del script
+
+1. **Extensiones → Apps Script**, abrir el archivo donde se pegó el código.
+2. Seleccionar todo (Ctrl+A), borrar y pegar el `Codigo.gs` nuevo. Guardar.
+3. En la planilla: **Agenda → Activar autocompletado en CICLOS**. Esto además
+   repara las filas que hayan quedado con `#ERROR!`.
+
 ## Notas
+
+- La planilla está en configuración regional de Argentina, donde las fórmulas
+  separan argumentos con `;`. El script lo detecta solo (con `,` daba
+  `#ERROR!`).
 
 - El Nº de paciente se guarda como texto para no perder los ceros a la
   izquierda (ej. `030700002`).
